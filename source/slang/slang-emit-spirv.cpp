@@ -3559,6 +3559,11 @@ struct SPIRVEmitContext : public SourceEmitterBase, public SPIRVEmitSharedContex
             switch (decor->getOp())
             {
             case kIROp_GLSLPrimitivesRateDecoration:
+                // A fragment stage consuming a per-primitive mesh output carries this decoration
+                // too, and its module would otherwise declare no MeshShadingEXT capability
+                // (VUID-RuntimeSpirv-OpVariable-08746).
+                requireSPIRVCapability(SpvCapabilityMeshShadingEXT);
+                ensureExtensionDeclaration(UnownedStringSlice("SPV_EXT_mesh_shader"));
                 emitOpDecorate(
                     getSection(SpvLogicalSectionID::Annotations),
                     decor,
@@ -3719,6 +3724,11 @@ struct SPIRVEmitContext : public SourceEmitterBase, public SPIRVEmitSharedContex
             switch (decor->getOp())
             {
             case kIROp_GLSLPrimitivesRateDecoration:
+                // A fragment stage consuming a per-primitive mesh output carries this decoration
+                // too, and its module would otherwise declare no MeshShadingEXT capability
+                // (VUID-RuntimeSpirv-OpVariable-08746).
+                requireSPIRVCapability(SpvCapabilityMeshShadingEXT);
+                ensureExtensionDeclaration(UnownedStringSlice("SPV_EXT_mesh_shader"));
                 emitOpDecorate(
                     getSection(SpvLogicalSectionID::Annotations),
                     decor,
