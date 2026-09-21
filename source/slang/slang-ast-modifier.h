@@ -725,6 +725,19 @@ class HLSLCentroidModifier : public InterpolationModeModifier
     FIDDLE(...)
 };
 
+// Slang's `perprimitive` modifier, the fragment-side spelling of GLSL's `perprimitiveEXT`.
+// The mesh side gets per-primitive-ness from its `MeshPrimitives<>` declarator; without this
+// the two stages' SPIR-V interfaces disagree and Vulkan rejects the pipeline
+// (VUID-RuntimeSpirv-OpVariable-08746, shader-slang/slang#7019).
+//
+// Not an InterpolationModeModifier: it is orthogonal to interpolation and combines with
+// `nointerpolation`.
+FIDDLE()
+class GLSLPerPrimitiveModifier : public Modifier
+{
+    FIDDLE(...)
+};
+
 /// Slang-defined `pervertex` modifier
 FIDDLE()
 class PerVertexModifier : public InterpolationModeModifier

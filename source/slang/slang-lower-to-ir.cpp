@@ -3054,6 +3054,10 @@ void addVarDecorations(IRGenContext* context, IRInst* inst, Decl* decl)
         {
             builder->addInterpolationModeDecoration(inst, IRInterpolationMode::NoInterpolation);
         }
+        else if (as<GLSLPerPrimitiveModifier>(mod))
+        {
+            builder->addDecoration(inst, kIROp_GLSLPrimitivesRateDecoration);
+        }
         else if (as<PerVertexModifier>(mod))
         {
             builder->addInterpolationModeDecoration(inst, IRInterpolationMode::PerVertex);

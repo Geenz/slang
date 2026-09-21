@@ -1049,9 +1049,10 @@ void createVarLayoutForLegalizedGlobalParam(
     // Make sure we respect the decoration on the inner most node.
     // So that the decoration on a struct field overrides the outer decoration
     // on a parameter of the struct type.
-    for (; outerParamInfo; outerParamInfo = outerParamInfo->next)
+    auto paramInfoChain = outerParamInfo;
+    for (auto paramInfoLink = paramInfoChain; paramInfoLink; paramInfoLink = paramInfoLink->next)
     {
-        auto paramInfo = outerParamInfo->outerParam;
+        auto paramInfo = paramInfoLink->outerParam;
         auto decorParent = paramInfo;
         if (auto field = as<IRStructField>(decorParent))
             decorParent = field->getKey();
@@ -1066,6 +1067,26 @@ void createVarLayoutForLegalizedGlobalParam(
     if (declarator && declarator->flavor == GlobalVaryingDeclarator::Flavor::meshOutputPrimitives)
     {
         builder->addDecoration(globalParam, kIROp_GLSLPrimitivesRateDecoration);
+    }
+    else if (context->stage == Stage::Fragment && kind == LayoutResourceKind::VaryingInput)
+    {
+        // A `perprimitive` fragment input carries the decoration from source rather than from
+        // the mesh-output declarator above, so walk the parameter's access chain and accept it
+        // on the parameter or on a struct field (shader-slang/slang#7019). In the fragment stage
+        // the modifier is the only source of this decoration; the mesh side takes its rate from
+        // the declarator above.
+        for (auto paramInfoLink = paramInfoChain; paramInfoLink;
+             paramInfoLink = paramInfoLink->next)
+        {
+            auto decorParent = paramInfoLink->outerParam;
+            if (auto field = as<IRStructField>(decorParent))
+                decorParent = field->getKey();
+            if (decorParent->findDecoration<IRGLSLPrimitivesRateDecoration>())
+            {
+                builder->addDecoration(globalParam, kIROp_GLSLPrimitivesRateDecoration);
+                break;
+            }
+        }
     }
 
     if (systemValueInfo)
