@@ -90,6 +90,12 @@ struct ContainerTypeKey
 /// A context for loading and re-using code modules.
 class Linkage : public RefObject, public slang::ISession
 {
+    /// The global Slang library session that this linkage is a child of
+    Session* m_session = nullptr;
+
+    // The parent must outlive every dependent member, including the AST builder.
+    RefPtr<Session> m_retainedSession;
+
 public:
     SLANG_COM_INTERFACE(
         0xa3f29c15,
@@ -451,11 +457,6 @@ public:
     RefPtr<SharedSemanticsContext> getSemanticsForReflection();
 
 private:
-    /// The global Slang library session that this linkage is a child of
-    Session* m_session = nullptr;
-
-    RefPtr<Session> m_retainedSession;
-
     /// Tracks state of modules currently being loaded.
     ///
     /// This information is used to diagnose cases where
